@@ -3,6 +3,7 @@ import sys
 import time
 import json
 import os.path
+from time import gmtime, strftime
 sys.path.append('..\\PTTCrawlerLibrary')
 import PTT
 print('Welcome to 準點報時機器人 v 1.0.17.0717')
@@ -21,6 +22,12 @@ except FileNotFoundError:
     ID = input('Input ID: ')
     Password = getpass.getpass('Input password: ')
 
+def Log(InputMessage, ends='\r\n'):
+    #TotalMessage = "[" + strftime("%Y-%m-%d %H:%M:%S") + "] " + InputMessage
+    #text.encode(sys.stdout.encoding)
+    #print(TotalMessage.encode('utf-8-sig', 'ignore').decode('utf-8-sig'))
+    print(InputMessage.encode(sys.stdin.encoding, "replace").decode(sys.stdin.encoding), end=ends)
+    
 PTTCrawler = PTT.Crawler(ID, Password, False)
 
 def readNextMinFile(Time):
@@ -53,9 +60,7 @@ else:
     LastTime = ''
     
     while True:
-    
         try:
-        
             ErrorCode, Time = PTTCrawler.getTime()
             if ErrorCode != PTTCrawler.Success:
                 PTTCrawler.Log('取得時間失敗')
@@ -78,7 +83,7 @@ else:
                 PTTCrawler.Log('成功啟動! 與 PTT 同步時間中')
                 LastTime = Time
             else:
-                time.sleep(50)
+                time.sleep(30)
             
             while LastTime == Time:
                 ErrorCode, Time = PTTCrawler.getTime()
@@ -90,20 +95,21 @@ else:
                 First = False
                 PTTCrawler.Log('成功同步')
             
-            PTTCrawler.Log(Time)
-            
             if FileData == None:
+                #PTTCrawler.Log(Time)
+                Log('PTT 時間: ' + Time, '\r')
                 continue
             
             ErrorCode = PTTCrawler.post(Board, Title, Content, 2, 0)
             if ErrorCode == PTTCrawler.Success:
-                PTTCrawler.Log('在 ' + Board + ' 板發文成功')
+                PTTCrawler.Log(Time + ' 在 ' + Board + ' 板發文成功')
             elif ErrorCode == PTTCrawler.NoPermission:
                 PTTCrawler.Log('發文權限不足')
             else:
-                PTTCrawler.Log('在  ' + Board + ' 板發文失敗') 
+                PTTCrawler.Log(Time + ' 在  ' + Board + ' 板發文失敗') 
+                
         except KeyboardInterrupt:
-            
+            # CTRL + C
             PTTCrawler.Log('使用者中斷')
             PTTCrawler.logout()
             sys.exit()
