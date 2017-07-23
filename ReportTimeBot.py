@@ -4,7 +4,7 @@ import time
 import json
 import os.path
 from time import gmtime, strftime
-sys.path.append('..\\PTTCrawlerLibrary')
+sys.path.append('..\\PTTCrawlerLibrary\\PTTCrawlerLibrary')
 import PTT
 import threading
 import requests
@@ -71,7 +71,7 @@ def getweather():
         )
         res.encoding = 'utf-8-sig'
         
-        Temp = LocationList[i] + '地區:\r\n\r\n'
+        Temp = '在' + LocationList[i] + '的朋友\r\n\r\n'
         Temp += clearTag(res.text)
         result += Temp
         
