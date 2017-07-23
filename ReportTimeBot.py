@@ -7,10 +7,13 @@ from time import gmtime, strftime
 sys.path.append('..\\PTTCrawlerLibrary')
 import PTT
 import threading
-print('Welcome to 準點報時機器人 v 1.0.17.0717')
+import requests
+from bs4 import BeautifulSoup
+
+print('Welcome to 準點報時機器人 v 1.0.17.0723')
 
 Board = "Wanted"
-
+#Board = "Test"
 # If you want to automatically login define Account.txt
 # {"ID":"YourID", "Password":"YourPW"}
 try:
@@ -26,6 +29,53 @@ except FileNotFoundError:
 def Log(InputMessage, ends='\r\n'):
     TotalMessage = "[" + strftime("%Y-%m-%d %H:%M:%S") + "] " + InputMessage
     print(TotalMessage.encode(sys.stdin.encoding, "replace").decode(sys.stdin.encoding), end=ends)
+
+def clearTag(String):
+    String = str(String)
+    
+    String = String.replace('<BR>', '\r\n')
+    String = String[:String.find('更新時間:')]
+    
+    while '<' in String and '>' in String:
+        String = String.replace(String[String.find('<') : String.find('>') + 1], '')
+    
+    while String.endswith('\r') or String.endswith('\n') or String.endswith(' '):
+        String = String[: len(String) - 1]
+    
+    return String
+
+def getweather():
+    result = ''
+    TargetURLList=['http://www.cwb.gov.tw/V7/forecast/taiwan/Hsinchu_City.htm'
+                   #, 'http://www.cwb.gov.tw/V7/forecast/taiwan/Taichung_City.htm'
+                   ]
+    LocationList=['新竹', '台中']
+    
+    for i in range(len(TargetURLList)):
+
+        TargetUrl = TargetURLList[i]
+        
+        res=requests.get(
+            url=TargetUrl,
+            timeout=3
+        )
+        res.encoding = 'utf-8-sig'
+        
+        WebUrl = res.text[res.text.find('readTXT(\'/V7/forecast/taiwan/Data'):]
+        WebUrl = WebUrl[:WebUrl.find('txt') + 3]
+        WebUrl = 'http://www.cwb.gov.tw/' + WebUrl[10:]
+        
+        res=requests.get(
+            url=WebUrl,
+            timeout=3
+        )
+        res.encoding = 'utf-8-sig'
+        
+        Temp = LocationList[i] + '地區:\r\n\r\n'
+        Temp += clearTag(res.text)
+        result += Temp
+        
+    return result
     
 PTTCrawler = PTT.Crawler(ID, Password, False)
 
@@ -88,7 +138,7 @@ else:
                 Content = '\r\n'.join(FileDataList[1:])
                 
                 Title = Title.replace('{TIME}', NextTimeString)
-                Content = Content.replace('{TIME}', NextTimeString)
+                Content = Content.replace('{TIME}', NextTimeString).replace('{WEATHER}', getweather())
                 
                 PTTCrawler.Log('偵測到報時檔案，將在一分鐘後在 ' + Board + ' 發文')
                 
