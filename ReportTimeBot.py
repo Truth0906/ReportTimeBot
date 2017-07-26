@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 print('Welcome to 準點報時機器人 v 1.0.17.0724')
 
 Board = "Wanted"
-#Board = "Test"
+Board = "Test"
 # If you want to automatically login define Account.txt
 # {"ID":"YourID", "Password":"YourPW"}
 try:
@@ -42,24 +42,52 @@ def clearTag(String):
     while String.endswith('\r') or String.endswith('\n') or String.endswith(' '):
         String = String[: len(String) - 1]
     
-    if String.find('今') > -1:
-        String = String[String.find('今'):]
+    if String.find('今(') > -1:
+        String = String[String.find('今('):]
+    if String.find('今天(') > -1:
+        String = String[String.find('今天('):]
+    if String.find('今天（') > -1:
+        String = String[String.find('今天（'):]
     
-    if String.find('明') > -1:
-        String = String[String.find('明'):]
+    if String.find('明(') > -1:
+        String = String[String.find('明('):]
+    if String.find('明天(') > -1:
+        String = String[String.find('明天('):]
+    if String.find('明天（') > -1:
+        String = String[String.find('明天（'):]
+    
+    String = String[:String.find('。') + 1]
     
     return String
 
 def getweather():
     result = ''
-    TargetURLList=['http://www.cwb.gov.tw/V7/forecast/taiwan/Hsinchu_City.htm'
-                   #, 'http://www.cwb.gov.tw/V7/forecast/taiwan/Taichung_City.htm'
-                   ]
-    LocationList=['新竹', '台中']
+    TargetURLList=[
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Taipei_City.htm', '台北市'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/New_Taipei_City.htm', '新北市'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Taoyuan_City.htm', '桃園'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Hsinchu_City.htm', '新竹'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Miaoli_County.htm', '苗栗'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Taichung_City.htm', '台中'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Changhua_County.htm', '彰化'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Nantou_County.htm', '南投'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Yunlin_County.htm', '雲林'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Chiayi_City.htm', '嘉義市'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Chiayi_County.htm', '嘉義縣'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Tainan_City.htm', '台南'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Kaohsiung_City.htm', '高雄'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Pingtung_County.htm', '屏東'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Yilan_County.htm', '宜蘭'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Hualien_County.htm', '花蓮'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Taitung_County.htm', '台東'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Penghu_County.htm', '澎湖'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Kinmen_County.htm', '金門'),
+        ('http://www.cwb.gov.tw/V7/forecast/taiwan/Lienchiang_County.htm', '連江縣'),
+    ]
     
     for i in range(len(TargetURLList)):
 
-        TargetUrl = TargetURLList[i]
+        TargetUrl, Location = TargetURLList[i]
         
         res=requests.get(
             url=TargetUrl,
@@ -77,12 +105,16 @@ def getweather():
         )
         res.encoding = 'utf-8-sig'
         
-        Temp = '在' + LocationList[i] + '的朋友\r\n\r\n'
-        Temp += clearTag(res.text)
+        Temp = '在' + Location + '的朋友\r\n\r\n'
+        Temp += clearTag(res.text) + '\r\n\r\n'
         result += Temp
-        
-    return result
     
+    result = result[:len(result) - 4]
+    return result
+'''
+print(getweather()+'!')
+sys.exit()
+'''
 PTTCrawler = PTT.Crawler(ID, Password, False)
 
 Time = ''
@@ -134,6 +166,7 @@ else:
                 First = True
                 LastTime = ''
                 continue
+            StartTime = time.time()
             
             FileData, NextTimeString = readNextMinFile(Time)
             if FileData != None:
@@ -156,7 +189,7 @@ else:
                 LastTime = Time
             else:
                 # Wait 50 sec
-                StartTime = time.time()
+                
                 EndTime = 0
                 
                 while EndTime - StartTime < 50:
