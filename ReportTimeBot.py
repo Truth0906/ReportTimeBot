@@ -4,13 +4,13 @@ import time
 import json
 import os.path
 from time import gmtime, strftime
-sys.path.append('..\\PTTCrawlerLibrary\\PTTCrawlerLibrary')
+sys.path.append('..\\PTTCrawlerLibrary')
 import PTT
 import threading
 import requests
 from bs4 import BeautifulSoup
 
-print('Welcome to 準點報時機器人 v 1.0.17.0723')
+print('Welcome to 準點報時機器人 v 1.0.17.0724')
 
 Board = "Wanted"
 #Board = "Test"
@@ -41,6 +41,12 @@ def clearTag(String):
     
     while String.endswith('\r') or String.endswith('\n') or String.endswith(' '):
         String = String[: len(String) - 1]
+    
+    if String.find('今') > -1:
+        String = String[String.find('今'):]
+    
+    if String.find('明') > -1:
+        String = String[String.find('明'):]
     
     return String
 
@@ -139,6 +145,9 @@ else:
                 
                 Title = Title.replace('{TIME}', NextTimeString)
                 Content = Content.replace('{TIME}', NextTimeString).replace('{WEATHER}', getweather())
+                
+                PTTCrawler.Log('標題: ' + Title)
+                PTTCrawler.Log('內文:\r\n' + Content)
                 
                 PTTCrawler.Log('偵測到報時檔案，將在一分鐘後在 ' + Board + ' 發文')
                 
