@@ -115,7 +115,7 @@ def getweather():
 print(getweather()+'!')
 sys.exit()
 '''
-PTTCrawler = PTT.Crawler(ID, Password, False)
+PTTCrawler = PTT.Library(ID, Password, False)
 
 Time = ''
 LastTime = ''
