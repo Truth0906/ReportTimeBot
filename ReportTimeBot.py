@@ -4,18 +4,18 @@ import time
 import json
 import os.path
 from time import gmtime, strftime
-sys.path.append('..\\PTTCrawlerLibrary')
-import PTT
 import threading
 import requests
 from bs4 import BeautifulSoup
+from PTTLibrary import PTT
 
-print('Welcome to 準點報時機器人 v 1.0.17.0724')
+print('Welcome to 準點報時機器人 v 1.0.18.0131')
 
 Board = "Wanted"
-Board = "Test"
-# If you want to automatically login define Account.txt
-# {"ID":"YourID", "Password":"YourPW"}
+#Board = "Test"
+# 如果你想要自動登入，建立 Account.txt
+# 然後裡面填上 {"ID":"YourID", "Password":"YourPW"}
+
 try:
     with open('Account.txt', encoding = 'utf-8-sig') as AccountFile:
         Account = json.load(AccountFile)
@@ -146,7 +146,7 @@ def readNextMinFile(Time):
 def showTime():
 
     while Running:
-        Log('PTT 時間: ' + Time, '\r')
+        Log('PTT ' + Time, '\r')
         time.sleep(1)
         
 if not PTTCrawler.isLoginSuccess():
